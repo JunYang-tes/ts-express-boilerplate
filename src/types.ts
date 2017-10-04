@@ -1,20 +1,20 @@
-import { Response } from "express";
+import { Response } from "express"
 export interface ClientError {
-  type: string;
+  type: string
 }
 
 export interface APIResponse<R> extends Response {
-  rawResData: R;
-  serverError?: Error;
-  clientError?: ClientError;
+  rawResData: R
+  serverError?: Error
+  clientError?: ClientError
 }
 export interface APIResult<R> {
-  api: string;
-  method: string;
-  version: string;
+  api: string
+  method: string
+  version: string
   result: {
-    code: string;
-    message?: string;
-    data?: R;
-  };
+    code: string
+    message?: string
+    data?: R
+  }
 }
