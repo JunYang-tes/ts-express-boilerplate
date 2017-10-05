@@ -10,73 +10,82 @@ import {
 } from "mongoose";
 import { promisify } from "util";
 interface Modified {
-  n: number;
-  ok: number;
+  n: number
+  ok: number
 }
 interface UpdateModified extends Modified {
-  nModified: number;
-  nUpserted?: number;
+  nModified: number
+  nUpserted?: number
+}
+export interface FindOption {
+  skip?: number
+  limit?: number
+  sort?: {
+    [field: string]: number
+  }
 }
 export class DAO<D extends Document> {
-  private model: Model<D>;
+  private model: Model<D>
   private asyncFind: (
     cond: object,
     project: object,
     option: object
-  ) => Promise<D[]>;
+  ) => Promise<D[]>
   private asyncFindById: (
     id: string | object | number,
     project: object,
     option: object
-  ) => Promise<D>;
+  ) => Promise<D>
   private asyncFindByIdAndRemove: (
     id: string | object | number,
     option?: object
-  ) => Promise<D | null>;
+  ) => Promise<D | null>
   private asyncFindByIdAndUpdate: (
     id: string | object | number,
     update: object,
     option: ModelFindByIdAndUpdateOptions
-  ) => Promise<D | null>;
+  ) => Promise<D | null>
   private asyncUpdate: (
     cond: object,
     doc: object,
     options: ModelUpdateOptions
-  ) => Promise<UpdateModified>;
-  private asyncCreate: (...docs: any[]) => Promise<D[] | D>;
-  private asyncRemove: (cond?: object) => Promise<{ result: Modified }>;
+  ) => Promise<UpdateModified>
+  private asyncCreate: (...docs: any[]) => Promise<D[] | D>
+  private asyncRemove: (cond?: object) => Promise<{ result: Modified }>
+  private asyncCount: (cond?: object) => Promise<number>
 
   constructor(collection: string, schema: Schema) {
-    this.model = model(collection, schema);
-    this.asyncFind = promisify<object, D[]>(this.model.find.bind(this.model));
+    this.model = model(collection, schema)
+    this.asyncFind = promisify<object, D[]>(this.model.find.bind(this.model))
     this.asyncFindById = promisify<string, D>(
       this.model.findById.bind(this.model)
-    );
+    )
     this.asyncFindByIdAndRemove = promisify<string, D>(
       this.model.findByIdAndRemove.bind(this.model)
-    );
+    )
     this.asyncFindByIdAndUpdate = promisify<string, D>(
       this.model.findByIdAndUpdate.bind(this.model)
-    );
+    )
     this.asyncUpdate = promisify<object, UpdateModified>(
       this.model.update.bind(this.model)
-    );
+    )
     this.asyncCreate = promisify(this.model.create.bind(this.model));
     this.asyncRemove = promisify<object, { result: Modified }>(
       this.model.remove.bind(this.model)
-    );
+    )
+    this.asyncCount = promisify<object, number>(this.model.count.bind(this.model))
   }
   public async find(
     condi: object,
     project?: object,
-    option?: object
+    option?: FindOption
   ): Promise<D[]> {
     return this.asyncFind(condi, project, option);
   }
   public async findById(
     id: string | number | object,
     project?: { [filed: string]: 0 | 1 },
-    option?: object
+    option?: FindOption
   ): Promise<D> {
     return this.asyncFindById(id, project, option);
   }
@@ -113,6 +122,10 @@ export class DAO<D extends Document> {
 
   public async remove(cond?: object): Promise<number> {
     return (await this.asyncRemove(cond)).result.n;
+  }
+
+  public async count(cond?: object) {
+    return this.asyncCount(cond)
   }
 }
 
