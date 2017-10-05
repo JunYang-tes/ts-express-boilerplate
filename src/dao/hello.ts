@@ -1,7 +1,9 @@
 import { DAOBase } from "./dao";
 export interface Hello {
-  name: string
+  name: string,
+  order: number
 }
 export const hello = new DAOBase<Hello>("hello", {
-  name: String
+  name: String,
+  order: Number
 })

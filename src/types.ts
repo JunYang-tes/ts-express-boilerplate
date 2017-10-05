@@ -18,3 +18,8 @@ export interface APIResult<R> {
     data?: R
   }
 }
+
+export interface Paging{
+  pageNum:number,
+  pageSize:number
+}
