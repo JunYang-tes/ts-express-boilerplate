@@ -53,6 +53,7 @@ export class DAO<D extends Document> {
   private asyncCreate: (...docs: any[]) => Promise<D[] | D>
   private asyncRemove: (cond?: object) => Promise<{ result: Modified }>
   private asyncCount: (cond?: object) => Promise<number>
+  private asyncFindOne: (cond?:object) => Promise<D>
 
   constructor(collection: string, schema: Schema) {
     this.model = model(collection, schema)
@@ -74,6 +75,7 @@ export class DAO<D extends Document> {
       this.model.remove.bind(this.model)
     )
     this.asyncCount = promisify<object, number>(this.model.count.bind(this.model))
+    this.asyncFindOne = promisify<object,D>(this.model.findOne.bind(this.model))
   }
   public async find(
     condi: object,
@@ -98,7 +100,10 @@ export class DAO<D extends Document> {
   ) {
     return this.asyncFindByIdAndRemove(id, option);
   }
-  public async findByIdAndUpdate(
+  public findOne(cond?:object){
+    return this.asyncFindOne(cond)
+  }
+  public findByIdAndUpdate(
     id: string | number | object,
     update?: object,
     option?: ModelFindByIdAndUpdateOptions
@@ -113,10 +118,10 @@ export class DAO<D extends Document> {
       return m.nModified;
     }
   }
-  public async create(...docs: any[]) {
+  public create(...docs: any[]) {
     return this.asyncCreate(...docs);
   }
-  public async add(doc: object) {
+  public add(doc: object) {
     return this.asyncCreate(doc) as Promise<D>;
   }
 
@@ -124,7 +129,7 @@ export class DAO<D extends Document> {
     return (await this.asyncRemove(cond)).result.n;
   }
 
-  public async count(cond?: object) {
+  public count(cond?: object) {
     return this.asyncCount(cond)
   }
 }
